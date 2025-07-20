@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-
 const initialState = {
   products: [],
   FilterProduct: [],
@@ -14,7 +13,7 @@ export const productsSlice = createSlice({
       state.products = payload;
     },
     setFilteredProduct: (state, { payload }) => {
-      console.log(payload)
+      console.log(payload);
       state.FilterProduct = payload;
     },
   },

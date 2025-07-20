@@ -9,11 +9,12 @@ import { Separator } from "@/components/ui/separator";
 
 import { Button } from "@/components/ui/button";
 import { ChevronDown, Circle } from "lucide-react";
-import { Check } from "lucide-react";
+
 import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
+
 //  Reusable collapsible section
 const FilterSection = ({
   title,
@@ -27,9 +28,11 @@ const FilterSection = ({
 }) => {
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState([0, maxPrice]);
-  // console.log(filters);
-  // const isSelected = filters.colors?.includes(colors.value);
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const gender = location.pathname.replace("/allproducts", "").split("/")[1];
 
+ 
   return (
     <div className="space-y-3">
       <Collapsible open={open} onOpenChange={setOpen}>
@@ -50,7 +53,12 @@ const FilterSection = ({
             >
               <Checkbox
                 id={option.id}
-                checked={option.checked}
+                checked={
+                  searchParams.getAll("mainCategory")?.includes(option.value) ||
+                  gender === option.value
+                    ? true
+                    : ""
+                }
                 onCheckedChange={(checked) =>
                   handleOnChecked(option.name, option.value, checked)
                 }
@@ -93,7 +101,7 @@ const FilterSection = ({
           {/* sales and Offer */}
           {name == "sales" && (
             <div className="flex gap-2">
-              <Checkbox  onCheckedChange={(e) => handleOnChecked(name, e,)} />
+              <Checkbox onCheckedChange={(e) => handleOnChecked(name, e)} />
               <Label className="text-base">{"Sales"}</Label>
             </div>
           )}
@@ -128,33 +136,21 @@ const FilterSection = ({
 //  Sidebar component
 
 const FilterSidebar = ({ handleOnChecked, maxPrice, handleOnClick }) => {
-  const location = useLocation();
   const { products, FilterProduct } = useSelector((state) => state.productInfo);
   const path = location.pathname.replace("/allproducts", "");
-  const { filtered } = useSelector((state) => state.filterInfo);
+  // const { filtered } = useSelector((state) => state.filterInfo);
 
   const gender = path.split("/")[1] || "";
 
   const genderOptions = [
     ...new Set(products.map((product) => product.mainCategory)),
   ].map((Category) => {
-    if (filtered?.mainCategory.includes(Category)) {
-      return {
-        id: Category,
-        label: Category?.charAt(0)?.toUpperCase() + Category.slice(1),
-        value: Category,
-        name: "mainCategory",
-        checked: true,
-      };
-    } else {
-      return {
-        id: Category,
-        label: Category?.charAt(0)?.toUpperCase() + Category.slice(1),
-        value: Category,
-        name: "mainCategory",
-        checked: "",
-      };
-    }
+    return {
+      id: Category,
+      label: Category?.charAt(0)?.toUpperCase() + Category.slice(1),
+      value: Category,
+      name: "mainCategory",
+    };
   });
 
   const saleOptions = [{ id: "sale", label: "Sale", name: "sales", value: "" }];
@@ -168,7 +164,7 @@ const FilterSidebar = ({ handleOnChecked, maxPrice, handleOnClick }) => {
     name: "colors",
     value: color.toLowerCase(),
     label: color.charAt(0).toUpperCase() + color.slice(1),
-    filters: { filtered },
+    // filters: { filtered },
   }));
 
   const brandOptions = [
@@ -200,7 +196,7 @@ const FilterSidebar = ({ handleOnChecked, maxPrice, handleOnClick }) => {
       <FilterSection
         title="Sale and Offers"
         name="sales"
-        handleOnChecked={ handleOnChecked}
+        handleOnChecked={handleOnChecked}
       />
       <Separator />
       <FilterSection

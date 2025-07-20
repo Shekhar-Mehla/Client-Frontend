@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from "lucide-react";
+import { PilcrowRight, SlidersHorizontal } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import AllProductList from "../../components/Products/AllProductList";
@@ -13,19 +13,36 @@ import FilterSidebar from "../../components/sidebar/FilterSideBar";
 
 import { useSelector } from "react-redux";
 import { Collapse } from "../../components/collapsible/Collapse";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { filtsrActions } from "../../features/filters/filtersAction";
+
 import { setFiltered } from "../../features/filters/filterSlice";
+import { buildQuery } from "../../utility/buildQuery";
 
 const AllProductsPage = () => {
   const [showFilter, setShowFilter] = useState(true);
   const { products, FilterProduct } = useSelector((state) => state.productInfo);
 
   const [productList, setProductList] = useState([]);
-  const location = useLocation();
+
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const param = new URLSearchParams(searchParams);
+   
+
+
+  // let params = {
+  //   mainCategory: [...new Set(searchParams.getAll("mainCategory"))] || [],
+  //   maxPrice: searchParams.get("maxPrice") || "",
+  //   minPrice: searchParams.get("minPrice") || "",
+  //   colors: searchParams.getAll("colors") || [],
+  //   sale: searchParams.get("sale") || "",
+  //   brand: searchParams.getAll("brand") || [],
+  //   productPath: searchParams.get("productPath") || "",
+  // };
+
+  // const query = buildQuery(searchParams);
+
   const { filtered } = useSelector((state) => state.filterInfo);
 
   const handleOnSortOption = (option) => {
@@ -43,66 +60,96 @@ const AllProductsPage = () => {
     }
   };
   const maxPrice = Math.max(...products.map((product) => product.price));
+  const mainCategory = [...new Set(searchParams.getAll("mainCategory"))] || [];
+  const colors = searchParams.getAll("colors") || [];
 
   const handleOnChecked = (name, value, checked) => {
     // Deep clone (shallow works here because mainCategory is a 1-level array)
-    console.log(name, value, checked);
-    const p = {
-      ...filtered,
-      mainCategory: [...filtered.mainCategory],
-      colors: [...filtered.colors],
-      brand: [...filtered.brand],
-    };
-    console.log(p);
-    if (name == "mainCategory") {
+    let mainCategory =
+      searchParams.get("mainCategory")?.split(",").filter(Boolean) || [];
+    let brand = searchParams.get("brand")?.split(",").filter(Boolean) || [];
+    let colors = searchParams.get("colors")?.split(",").filter(Boolean) || [];
+    let sale = searchParams.get("sale") || "";
+
+    const newParams = new URLSearchParams(searchParams);
+
+    if (name === "colors") {
       if (checked) {
-        if (!p[name].includes(value)) {
-          p[name].push(value);
-          p.productPath = "";
-          navigate(
-            `/allproducts${p.mainCategory ? "/" + p.mainCategory.join("-") : ""}`
-          );
+        if (!colors.includes(value)) {
+          colors.push(value);
         }
       } else {
-        p[name] = p[name].filter((item) => item !== value);
-        navigate(
-          `/allproducts${p.mainCategory ? "/" + p.mainCategory.join("-") : ""}`
-        );
+        colors = [...new Set(colors)];
+
+        colors = colors.filter((clr) => clr !== value);
       }
+
+      // Create new search params from scratch
+
+      if (colors.length > 0) {
+        newParams.set("colors", colors.join(","));
+      } else {
+        newParams.delete("colors");
+      }
+      setSearchParams(newParams);
     }
-    if (name == "sales") {
+    if (name === "mainCategory") {
+      if (checked) {
+        if (!mainCategory.includes(value)) {
+          mainCategory.push(value);
+        }
+      } else {
+        mainCategory = [...new Set(mainCategory)];
+
+        mainCategory = mainCategory.filter((category) => category !== value);
+      }
+
+      // Create new search params from scratch
+
+      if (mainCategory.length > 0) {
+        newParams.set("mainCategory", mainCategory.join(","));
+      } else {
+        newParams.delete("mainCategory");
+      }
+      setSearchParams(newParams);
+    }
+    if (name === "brand") {
+      if (checked) {
+        if (!brand.includes(value)) {
+          brand.push(value);
+        }
+      } else {
+        brand = [...new Set(brand)];
+
+        brand = brand.filter((brnd) => brnd !== value);
+      }
+
+      // Create new search params from scratch
+
+      if (brand.length > 0) {
+        newParams.set("brand", brand.join(","));
+      } else {
+        newParams.delete("brand");
+      }
+      setSearchParams(newParams);
+    }
+    if (name === "sales") {
       if (value) {
-        p.sale = true;
+        newParams.set("sale", true);
       } else {
-        p.sale = false;
+        newParams.delete("sale");
       }
+      setSearchParams(newParams);
     }
-    if (name == "brand") {
-      if (checked) {
-        if (!p[name].includes(value)) {
-          p[name].push(value);
-        }
-      } else {
-        p[name] = p[name].filter((item) => item !== value);
-      }
-    }
-    if (name == "colors") {
-      if (checked) {
-        if (!p[name].includes(value)) {
-          p[name].push(value); // ✅ safe now
-        }
-      } else {
-        p[name] = p[name].filter((item) => item !== value);
-      }
-    }
-
-    dispatch(setFiltered(p));
   };
-
   const handleOnClick = (name, value) => {
     const p = { ...filtered };
     p.minPrice = value[0];
     p.maxPrice = value[1];
+    searchParams.set("maxPrice", p.maxPrice);
+    searchParams.set("minPrice", p.minPrice);
+    setSearchParams(searchParams);
+
     dispatch(setFiltered(p));
   };
 
@@ -137,8 +184,7 @@ const AllProductsPage = () => {
               handleOnChecked={handleOnChecked}
               maxPrice={maxPrice}
               handleOnClick={handleOnClick}
-
-              // genderOptions={genderOptions}
+              searchParams={searchParams}
             />
           </aside>
         )}

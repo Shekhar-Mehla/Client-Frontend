@@ -6,11 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Star } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { fetchFilterProductAction } from "../../features/product/productAction";
-import { useNavigate } from "react-router-dom";
+import {
+  fetchFilterProductAction,
+  fetchProductAction,
+} from "../../features/product/productAction";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useRef } from "react";
 import { buildQuery } from "../../utility/buildQuery";
 import { setProducts } from "../../features/product/productSlice";
+import { setFiltered } from "../../features/filters/filterSlice";
 
 const AllProductList = ({
   setProductList,
@@ -20,42 +24,41 @@ const AllProductList = ({
   hasActiveFilters,
 }) => {
   const dispatch = useDispatch();
+  const location = useLocation();
+
   const navigate = useNavigate();
   const [wishlist, setWishlist] = useState([]);
   const { products, FilterProduct } = useSelector((state) => state.productInfo);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { filtered } = useSelector((state) => state.filterInfo);
 
   const debouncedFetch = useRef(null);
   const ref = useRef(true);
   // fetch all products when component mounts
-  useEffect(() => {
-    console.log("useeffect");
 
+  useEffect(() => {
     if (FilterProduct?.length > 0) {
       setProductList([...FilterProduct]);
 
       return;
     }
 
-    if (
-      products &&
-      products.length > 0 &&
-      ref.current
-      // !filtered.productPath
-    ) {
+    if (products && products.length > 0 && ref.current) {
       return setProductList([...products]);
     }
 
-    ref.current = false;
+    // console.log(FilterProduct.length);
     if (!FilterProduct.length) {
       setProductList([]);
     }
+    ref.current = false;
   }, [dispatch, products, FilterProduct]);
 
   // another useEffect
 
   if (!debouncedFetch.current) {
     debouncedFetch.current = (function () {
+      console.log("hello");
       let id;
       return (query) => {
         clearTimeout(id);
@@ -67,16 +70,9 @@ const AllProductList = ({
   }
 
   useEffect(() => {
-    const obj = {
-      ...filtered,
-      mainCategory: filtered.mainCategory.join(","),
-      brand: filtered.brand.join(","),
-      colors: filtered.colors.join(","),
-    };
-    console.log("filter userfeerd");
-    const query = buildQuery(obj);
-    debouncedFetch.current(query);
-  }, [filtered]);
+    console.log(location.search);
+    debouncedFetch.current(location.search);
+  }, [searchParams]);
 
   //function to toggle wishlist
   const toggleWishlist = (id) => {

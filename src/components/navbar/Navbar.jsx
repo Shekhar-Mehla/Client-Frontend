@@ -1,7 +1,7 @@
 // Navbar.jsx
 import { use, useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,21 +14,18 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { capitalize } from "../../utility/buldCapital";
 import { setFiltered } from "../../features/filters/filterSlice";
+import { buildQuery } from "../../utility/buildQuery";
+import { Search } from "lucide-react";
 
 const Navbar = () => {
   const { categories } = useSelector((state) => state.categoriesInfo);
-  const { filtered } = useSelector((state) => state.filterInfo);
-  const dispatch = useDispatch();
-  
+
+  const [searchParams] = useSearchParams();
+  const prams = new URLSearchParams(searchParams);
+
   const navigate = useNavigate();
   const handleOnCategoryClick = (categoryPath) => {
     navigate(`/allproducts${categoryPath}`);
-    let p = {
-      ...filtered,
-      mainCategory: [categoryPath.split("/")[1]],
-      productPath: categoryPath,
-    };
-    dispatch(setFiltered(p));
   };
 
   const renderSubCategories = (parentId) => {
