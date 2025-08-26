@@ -61,7 +61,7 @@ const RecommendationProducts = () => {
       dispatch(fetchWishlistAction());
     }
   }, [dispatch, user?._id]);
-  return (
+  return (recomedateProducts.length>0&&
     <section className="px-8 mb-8 mt-8">
       <h2 className="text-2xl font-bold text-gray-800 text-center mb-8">
         Recommended Products

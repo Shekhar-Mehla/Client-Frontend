@@ -30,7 +30,6 @@ const Header = () => {
 
   const wishlistItemsCount = wishlistProducts?.length || 0;
   console.log("Number of wishlist items : ", wishlistItemsCount);
-  
 
   useEffect(() => {
     ref.current &&
@@ -41,9 +40,8 @@ const Header = () => {
   }, [dispatch]);
 
   //this is for logout
-  const handleLogout = async () => {
-    if (!user?.email) return;
-    await dispatch(logoutUserAction(user.email));
+  const handleLogout = () => {
+    if (!user?.email) return dispatch(logoutUserAction(user.email));
     navigate("/");
   };
 
