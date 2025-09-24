@@ -39,19 +39,14 @@ const AllProductList = ({ setProductList, productList }) => {
     }
     dispatch(toggleWishlistAction(productId));
   };
-<<<<<<< HEAD
-  // useEffect(() => {
-  //   //To  persist login when page refreshed
-  //   dispatch(getUserAction());
-  // }, [dispatch]);
-=======
+
 
   useEffect(() => {
     //To  persist login when page refreshed
     dispatch(getUserAction());
   }, [dispatch]);
 
->>>>>>> 46a6a9d97b79de8ff9c87f05fc9a8f1112612dfd
+
   // fetch all products when component mounts
   useEffect(() => {
     if (FilterProduct?.length > 0) {

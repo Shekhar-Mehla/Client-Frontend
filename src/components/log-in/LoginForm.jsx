@@ -18,11 +18,15 @@ import { useDispatch } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../helper/LoadingSpinner";
 import { getUserAction } from "../../features/user/userAction";
+import { GoogleLogin } from "@react-oauth/google";
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const location = useLocation();
+  const handleOnClickSignInWithGoogle = () => {
+    window.location.href = "http://localhost:8001/api/v1/auth/google";
+  };
 
   // const params = new URLSearchParams(location.search);
   const redirectPath = location?.search.replace("?redirect=", "") || "/";
@@ -170,9 +174,15 @@ const LoginForm = () => {
           <span>Or</span>
           <span className="h-px bg-border flex-1" />
         </div>
-        {/* Social Login Buttons */}
+        {/* Social Login Buttons start here */}
+
         <div className="flex  items-center justify-center space-x-5">
-          <Button variant="outline" className="w-50 flex items-center gap-2">
+          <Button
+            onClick={handleOnClickSignInWithGoogle}
+            // onClick={handleOnClickSignInWithGoogle}
+            variant="outline"
+            className="w-50 flex items-center gap-2"
+          >
             <FcGoogle className="text-xl" />
             Sign in with Google
           </Button>
